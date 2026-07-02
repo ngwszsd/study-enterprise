@@ -1,0 +1,25 @@
+# OS
+.DS_Store
+
+# Env / secrets
+.env
+*.local
+
+# Java / Maven
+target/
+*.class
+!**/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+
+# Node / frontend
+node_modules/
+dist/
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
