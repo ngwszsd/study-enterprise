@@ -8,7 +8,7 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 
-.PHONY: help up down ps logs java kotlin install web test test-java test-kotlin build clean reset-db
+.PHONY: help up down ps logs status java kotlin install web test test-java test-kotlin build clean reset-db
 
 help: ## 显示所有目标
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-13s\033[0m %s\n", $$1, $$2}'
@@ -27,6 +27,15 @@ ps: ## 查看容器状态
 
 logs: ## 跟踪基础设施日志
 	docker compose logs -f
+
+status: ## 查看基础设施 + 各服务运行状态
+	@echo "== 基础设施(Docker)=="
+	@docker compose ps 2>/dev/null || true
+	@echo "== 应用(默认端口)=="
+	@c=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:8080/actuator/health); [ "$$c" = 000 ] && echo "  ⛔ Java 后端    :8080  未运行" || echo "  ✅ Java 后端    :8080  运行中 (HTTP $$c)"
+	@c=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:8081/actuator/health); [ "$$c" = 000 ] && echo "  ⛔ Kotlin 后端  :8081  未运行" || echo "  ✅ Kotlin 后端  :8081  运行中 (HTTP $$c)"
+	@c=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:5173/); [ "$$c" = 000 ] && echo "  ⛔ 前端         :5173  未运行" || echo "  ✅ 前端         :5173  运行中 (HTTP $$c)"
+	@c=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:9001/); [ "$$c" = 000 ] && echo "  ⛔ MinIO 控制台 :9001  未运行" || echo "  ✅ MinIO 控制台 :9001  运行中 (HTTP $$c)"
 
 # ---- 后端 ----
 java: ## 起 Java 后端(:8080,Maven)
