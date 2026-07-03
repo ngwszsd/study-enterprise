@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.study.cache.RedisArticleCache;
 import com.study.domain.Article;
 import com.study.domain.User;
+import com.study.event.ArticleCreatedEvent;
 import com.study.exception.ForbiddenException;
 import com.study.exception.ResourceNotFoundException;
 import com.study.mapper.ArticleMapper;
@@ -17,6 +18,7 @@ import com.study.web.dto.PageResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +30,16 @@ public class ArticleService {
     private final UserMapper userMapper;
     private final StorageService storageService;
     private final RedisArticleCache cache;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ArticleService(ArticleMapper articleMapper, UserMapper userMapper,
-                          StorageService storageService, RedisArticleCache cache) {
+                          StorageService storageService, RedisArticleCache cache,
+                          ApplicationEventPublisher eventPublisher) {
         this.articleMapper = articleMapper;
         this.userMapper = userMapper;
         this.storageService = storageService;
         this.cache = cache;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -83,7 +88,9 @@ public class ArticleService {
         article.setCoverImageKey(request.coverImageKey());
         article.setAuthorId(authorId);
         articleMapper.insert(article);
-        return toResponse(article, usernameOf(authorId), 0L);
+        String author = usernameOf(authorId);
+        eventPublisher.publishEvent(new ArticleCreatedEvent(article.getId(), article.getTitle(), author));
+        return toResponse(article, author, 0L);
     }
 
     @Transactional

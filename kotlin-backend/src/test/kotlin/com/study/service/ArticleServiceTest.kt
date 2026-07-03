@@ -15,6 +15,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import org.springframework.context.ApplicationEventPublisher
 
 /** ArticleService 单元测试(MockK):创建、作者归属校验、未找到、删除。 */
 class ArticleServiceTest {
@@ -23,7 +24,8 @@ class ArticleServiceTest {
     private val userMapper = mockk<UserMapper>()
     private val storageService = mockk<StorageService>()
     private val cache = mockk<RedisArticleCache>(relaxed = true)
-    private val articleService = ArticleService(articleMapper, userMapper, storageService, cache)
+    private val eventPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
+    private val articleService = ArticleService(articleMapper, userMapper, storageService, cache, eventPublisher)
 
     @Test
     fun `创建 返回含作者与0浏览量`() {

@@ -4,6 +4,7 @@ import ArticleDetailPage from './pages/ArticleDetailPage'
 import ArticleEditPage from './pages/ArticleEditPage'
 import ArticleListPage from './pages/ArticleListPage'
 import LoginPage from './pages/LoginPage'
+import RealtimePage from './pages/RealtimePage'
 import RegisterPage from './pages/RegisterPage'
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/articles/new" element={<ArticleEditPage />} />
         <Route path="/articles/:id" element={<ArticleDetailPage />} />
         <Route path="/articles/:id/edit" element={<ArticleEditPage />} />
+        <Route path="/realtime" element={<RealtimePage />} />
       </Route>
       <Route path="*" element={<Navigate to="/articles" replace />} />
     </Routes>

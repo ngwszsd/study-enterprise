@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.study.cache.RedisArticleCache
 import com.study.domain.Article
+import com.study.event.ArticleCreatedEvent
 import com.study.exception.ForbiddenException
 import com.study.exception.ResourceNotFoundException
 import com.study.mapper.ArticleMapper
@@ -13,6 +14,7 @@ import com.study.web.dto.ArticleRequest
 import com.study.web.dto.ArticleResponse
 import com.study.web.dto.CategoryCount
 import com.study.web.dto.PageResponse
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -23,6 +25,7 @@ class ArticleService(
     private val userMapper: UserMapper,
     private val storageService: StorageService,
     private val cache: RedisArticleCache,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
     @Transactional(readOnly = true)
@@ -64,7 +67,9 @@ class ArticleService(
             this.authorId = authorId
         }
         articleMapper.insert(article)
-        return toResponse(article, usernameOf(authorId), 0L)
+        val author = usernameOf(authorId)
+        eventPublisher.publishEvent(ArticleCreatedEvent(article.id, article.title, author))
+        return toResponse(article, author, 0L)
     }
 
     @Transactional

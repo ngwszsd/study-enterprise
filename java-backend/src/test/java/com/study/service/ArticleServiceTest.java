@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 /** ArticleService 单元测试:创建、作者归属校验、未找到、删除。 */
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +35,8 @@ class ArticleServiceTest {
     StorageService storageService;
     @Mock
     RedisArticleCache cache;
+    @Mock
+    ApplicationEventPublisher eventPublisher;
     @InjectMocks
     ArticleService articleService;
 

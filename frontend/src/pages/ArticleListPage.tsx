@@ -55,6 +55,7 @@ export default function ArticleListPage() {
         <h1 className="text-2xl font-bold text-gray-900">文章</h1>
         <div className="flex items-center gap-3 text-sm">
           <span className="text-gray-500">你好,{user?.username}</span>
+          <Link to="/realtime" className="text-indigo-600 hover:underline">实时</Link>
           <Button onClick={() => navigate('/articles/new')}>写文章</Button>
           <GhostButton onClick={onLogout}>退出</GhostButton>
         </div>

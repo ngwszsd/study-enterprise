@@ -20,6 +20,7 @@
 | 缓存 | **Redis 7**(文章详情缓存 + 浏览量计数) |
 | 认证 | JWT(HS,jjwt 0.12)+ Spring Security 无状态 + BCrypt |
 | 对象存储 | MinIO(官方 Java SDK) |
+| 实时 | WebSocket(聊天室)+ SSE(通知流),Spring 事件驱动 |
 | 前端 | React + Vite + TypeScript + Tailwind |
 | 基础设施 | Docker Compose(MySQL + MinIO + Redis) |
 
@@ -107,6 +108,10 @@ MinIO 控制台:http://localhost:9001(`minioadmin` / `minioadmin123`)。
 | DELETE | `/api/articles/{id}` | 删除(需作者)→ 204 |
 | POST | `/api/files` | multipart `file`(仅图片≤5MB)→ 201 `{key,url}` |
 | GET | `/api/files/url?key=` | 换预签名 URL |
+| WS | `/ws/chat?token=` | **WebSocket** 聊天室(握手 token 鉴权,双向广播;新文章推系统消息) |
+| GET | `/api/sse/notifications?token=` | **SSE** 通知流(EventSource;新文章实时推送 `article-created`) |
+
+> 实时:文章创建时后端发布 `ArticleCreatedEvent`(Spring 事件),WS 与 SSE 各自 `@EventListener` 推送。浏览器 WS/EventSource 不能带 header,故 token 走查询参数握手鉴权。
 
 `Article`:`{id,title,content,category,coverImageKey,coverImageUrl,authorId,authorUsername,createdAt,updatedAt,viewCount}`。
 错误:`{code,message}`(校验附 `errors`)。code:`VALIDATION_ERROR/UNAUTHORIZED/FORBIDDEN/NOT_FOUND/CONFLICT/INVALID_FILE/INTERNAL_ERROR`。
@@ -135,7 +140,7 @@ MinIO 控制台:http://localhost:9001(`minioadmin` / `minioadmin123`)。
 | 入口 | `SpringApplication.run(...)` | `runApplication<...>(*args)` |
 | 分页回填 | `new PageResponse<>(...)` | `PageResponse(...)`(具名/默认参数) |
 
-**全链路工具都用到了**:MySQL(Flyway 建表 + MyBatis-Plus CRUD/分页 + **手写 @Select SQL** 统计)、Redis(详情缓存 + 浏览量,key 按应用前缀隔离)、MinIO(上传预签名 URL + **删文章时删对象**)。
+**全链路工具都用到了**:MySQL(Flyway 建表 + MyBatis-Plus CRUD/分页 + **手写 @Select SQL** 统计)、Redis(详情缓存 + 浏览量,key 按应用前缀隔离)、MinIO(上传预签名 URL + **删文章时删对象**)、**WebSocket**(聊天室,双向)、**SSE**(通知流,服务端推送;均由 Spring 事件驱动)。
 
 构建都用 Maven;Kotlin 需 `kotlin-maven-plugin` + `kotlin-spring`(all-open,让 `@Service`/`@Configuration` 可被 CGLIB 代理)。
 ⚠️ Kotlin 编译器需 **2.2+** 才支持在 JDK 25 上运行(本项目用 `2.3.21`;`2.1.0` 会在 JRT 初始化时崩)。
