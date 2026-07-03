@@ -55,6 +55,19 @@ Java 后端包结构:`domain / mapper / service / storage / cache / security / c
 
 ## 5. 如何运行
 
+**推荐用 `make`**(根目录 Makefile;`make` 列出全部命令):
+
+```bash
+make up        # 起 MySQL + MinIO + Redis
+make java      # Java 后端 :8080
+make kotlin    # Kotlin 后端 :8081
+make web       # 前端 :5173
+make test      # 两套后端测试
+# 端口被占用时:SERVER_PORT=8090 REDIS_PORT=6380 make java
+```
+
+等价的手工命令:
+
 ```bash
 cp .env.example .env
 docker compose up -d           # 起 mysql + minio + redis(首次自动建两库)
