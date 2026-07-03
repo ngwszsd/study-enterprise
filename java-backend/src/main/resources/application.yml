@@ -36,3 +36,7 @@ minio:
   access-key: ${MINIO_ACCESS_KEY:minioadmin}
   secret-key: ${MINIO_SECRET_KEY:minioadmin123}
   bucket: ${MINIO_BUCKET:study}
+
+collab:
+  url: ${COLLAB_URL:ws://localhost:19082}
+  internal-secret: ${COLLAB_INTERNAL_SECRET:dev-collab-secret}

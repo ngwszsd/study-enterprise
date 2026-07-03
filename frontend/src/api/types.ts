@@ -55,3 +55,36 @@ export interface CategoryCount {
   category: string
   count: number
 }
+
+export interface Note {
+  id: number
+  title: string
+  ownerId: number
+  ownerUsername: string | null
+  role: 'OWNER' | 'EDITOR' | 'VIEWER'
+  createdAt: string
+  updatedAt: string
+}
+
+export interface NoteRequest {
+  title: string
+}
+
+export interface NoteMember {
+  userId: number
+  username: string | null
+  role: 'OWNER' | 'EDITOR' | 'VIEWER'
+}
+
+export interface NoteMemberRequest {
+  userId: number
+  role: 'EDITOR' | 'VIEWER'
+}
+
+export interface CollabTokenResponse {
+  token: string
+  expiresIn: number
+  docName: string
+  role: 'OWNER' | 'EDITOR' | 'VIEWER'
+  url: string
+}

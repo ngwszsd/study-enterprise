@@ -4,6 +4,8 @@ import ArticleDetailPage from './pages/ArticleDetailPage'
 import ArticleEditPage from './pages/ArticleEditPage'
 import ArticleListPage from './pages/ArticleListPage'
 import LoginPage from './pages/LoginPage'
+import NoteEditorPage from './pages/NoteEditorPage'
+import NoteListPage from './pages/NoteListPage'
 import RealtimePage from './pages/RealtimePage'
 import RegisterPage from './pages/RegisterPage'
 
@@ -18,6 +20,8 @@ export default function App() {
         <Route path="/articles/:id" element={<ArticleDetailPage />} />
         <Route path="/articles/:id/edit" element={<ArticleEditPage />} />
         <Route path="/realtime" element={<RealtimePage />} />
+        <Route path="/notes" element={<NoteListPage />} />
+        <Route path="/notes/:id" element={<NoteEditorPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/articles" replace />} />
     </Routes>

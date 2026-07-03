@@ -33,6 +33,7 @@ class SecurityConfig(private val jwtService: JwtService) {
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it.requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
+                    .requestMatchers("/api/notes/internal/**").permitAll()
                     .requestMatchers("/actuator/health", "/ws/**", "/api/sse/**").permitAll()
                     .anyRequest().authenticated()
             }

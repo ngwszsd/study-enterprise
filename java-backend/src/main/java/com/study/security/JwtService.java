@@ -33,6 +33,21 @@ public class JwtService {
                 .compact();
     }
 
+    public String generateCollabToken(Long userId, String username, Long noteId, String role, long expiresInSeconds) {
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .subject(String.valueOf(userId))
+                .claim("username", username)
+                .claim("typ", "collab")
+                .claim("noteId", noteId)
+                .claim("docName", "note:" + noteId)
+                .claim("role", role)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusSeconds(expiresInSeconds)))
+                .signWith(key)
+                .compact();
+    }
+
     public Claims parse(String token) {
         return Jwts.parser()
                 .verifyWith(key)

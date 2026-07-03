@@ -28,6 +28,21 @@ class JwtService(properties: JwtProperties) {
             .compact()
     }
 
+    fun generateCollabToken(userId: Long, username: String, noteId: Long, role: String, expiresInSeconds: Long): String {
+        val now = Instant.now()
+        return Jwts.builder()
+            .subject(userId.toString())
+            .claim("username", username)
+            .claim("typ", "collab")
+            .claim("noteId", noteId)
+            .claim("docName", "note:$noteId")
+            .claim("role", role)
+            .issuedAt(Date.from(now))
+            .expiration(Date.from(now.plusSeconds(expiresInSeconds)))
+            .signWith(key)
+            .compact()
+    }
+
     fun parse(token: String): Claims =
         Jwts.parser().verifyWith(key).build().parseSignedClaims(token).payload
 }

@@ -7,7 +7,7 @@
 ## 1. 目标
 
 用 Java 与 Kotlin 各写一套**业务完全相同**的企业级 Spring Boot 后端(以"语言"为唯一变量对照学习),
-覆盖:注册/登陆(JWT)、文章 CRUD + 分页搜索、Redis 缓存与浏览量、MinIO 文件上传。
+覆盖:注册/登陆(JWT)、文章 CRUD + 分页搜索、Redis 缓存与浏览量、MinIO 文件上传、Yjs/Hocuspocus 实时多人协作笔记。
 共用一个 React + Vite + Tailwind 前端串起全链路。暂不用 monorepo。
 
 ## 2. 技术栈
@@ -23,6 +23,7 @@
 | 认证 | JWT(HS,jjwt 0.12)+ Spring Security 无状态 + BCrypt |
 | 对象存储 | MinIO(官方 Java SDK) |
 | 实时 | WebSocket(聊天室)+ SSE(通知流),Spring 事件驱动 |
+| 协作编辑 | NestJS + Hocuspocus + Yjs(短期协作 token + MySQL binary snapshot) |
 | 前端 | React + Vite + TypeScript + Tailwind |
 | 基础设施 | Docker Compose(MySQL + MinIO + Redis) |
 
@@ -40,6 +41,7 @@ study-enterprise/
 ├── infra/mysql/init/          # 建两套 schema
 ├── java-backend/              # Spring Boot(Java):18080
 ├── kotlin-backend/            # Spring Boot(Kotlin):18081
+├── collab-server/             # NestJS + Hocuspocus 协作服务:19082
 └── frontend/                  # React + Vite + Tailwind:15173
 ```
 
@@ -54,6 +56,7 @@ Java 后端包结构:`domain / mapper / service / storage / cache / security / c
 | MySQL | 13306 |
 | MinIO API / Console | 19100 / 19101 |
 | Redis | 16379 |
+| 协作服务(Hocuspocus) | 19082 |
 | 前端 Vite | 15173 |
 
 ## 5. 如何运行
@@ -64,6 +67,7 @@ Java 后端包结构:`domain / mapper / service / storage / cache / security / c
 make up        # 起 MySQL + MinIO + Redis
 make java      # Java 后端 :18080
 make kotlin    # Kotlin 后端 :18081
+make collab    # 协作服务 :19082(默认连 Java 后端)
 make web       # 前端 :15173
 make test      # 两套后端测试
 # 端口被占用时:SERVER_PORT=18090 REDIS_PORT=16380 make java
@@ -83,6 +87,10 @@ cd java-backend && ./mvnw spring-boot:run
 cd kotlin-backend && ./gradlew bootRun
 #   跑测试:./gradlew test
 
+# 协作服务(:19082)—— NestJS + Hocuspocus,默认连 Java 后端
+cd collab-server && pnpm install && pnpm dev
+#   切 Kotlin 后端:COLLAB_BACKEND_URL=http://localhost:18081 pnpm dev
+
 # 前端(:15173)
 cd frontend && pnpm install && pnpm dev
 ```
@@ -91,7 +99,7 @@ MinIO 控制台:http://localhost:19101(`minioadmin` / `minioadmin123`)。
 
 ## 6. 环境变量
 
-见 `.env.example`。关键:`DB_*`、`MINIO_*`、`REDIS_*`、`JWT_*`。Spring 用 application.yml 的 `${VAR:default}` 兜底,本地不设也能跑。
+见 `.env.example`。关键:`DB_*`、`MINIO_*`、`REDIS_*`、`JWT_*`、`COLLAB_*`。Spring 用 application.yml 的 `${VAR:default}` 兜底,本地不设也能跑。
 
 ## 7. API 契约(两套后端一致)
 
@@ -110,12 +118,25 @@ MinIO 控制台:http://localhost:19101(`minioadmin` / `minioadmin123`)。
 | DELETE | `/api/articles/{id}` | 删除(需作者)→ 204 |
 | POST | `/api/files` | multipart `file`(仅图片≤5MB)→ 201 `{key,url}` |
 | GET | `/api/files/url?key=` | 换预签名 URL |
+| GET | `/api/notes` | 当前用户可访问的协作笔记列表 |
+| POST | `/api/notes` | `{title}` → 201 `Note`(自动创建 OWNER 成员和空 Yjs 文档) |
+| GET | `/api/notes/{id}` | 笔记元数据(需成员权限) |
+| PUT | `/api/notes/{id}` | 改标题(需 OWNER) |
+| DELETE | `/api/notes/{id}` | 删除笔记(需 OWNER) |
+| GET | `/api/notes/{id}/members` | 成员列表 |
+| POST | `/api/notes/{id}/members` | `{userId,role}` 添加/更新 EDITOR/VIEWER(需 OWNER) |
+| DELETE | `/api/notes/{id}/members/{userId}` | 移除成员(需 OWNER) |
+| POST | `/api/notes/{id}/collab-token` | 换 5 分钟短期协作 token,供 Hocuspocus 鉴权 |
+| WS | `ws://localhost:19082` | Hocuspocus 协作连接,文档名 `note:{id}`,token 用 `/collab-token` 返回值 |
 | WS | `/ws/chat?token=` | **WebSocket** 聊天室(握手 token 鉴权,双向广播;新文章推系统消息) |
 | GET | `/api/sse/notifications?token=` | **SSE** 通知流(EventSource;新文章实时推送 `article-created`) |
 
 > 实时:文章创建时后端发布 `ArticleCreatedEvent`(Spring 事件),WS 与 SSE 各自 `@EventListener` 推送。浏览器 WS/EventSource 不能带 header,故 token 走查询参数握手鉴权。
+>
+> 协作编辑:普通业务权限仍在 Java/Kotlin 后端。前端先用登录 JWT 请求 `/api/notes/{id}/collab-token`,再把短期 token 交给 Hocuspocus Provider。NestJS 协作服务只校验 `typ=collab` 的短期 token,并通过内部接口 `/api/notes/internal/{id}/document` 读写 Yjs binary snapshot(用 `X-Collab-Secret` 保护)。
 
 `Article`:`{id,title,content,category,coverImageKey,coverImageUrl,authorId,authorUsername,createdAt,updatedAt,viewCount}`。
+`Note`:`{id,title,ownerId,ownerUsername,role,createdAt,updatedAt}`。
 错误:`{code,message}`(校验附 `errors`)。code:`VALIDATION_ERROR/UNAUTHORIZED/FORBIDDEN/NOT_FOUND/CONFLICT/INVALID_FILE/INTERNAL_ERROR`。
 
 ## 8. Redis 用法(企业常见两种)

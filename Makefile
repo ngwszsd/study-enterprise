@@ -8,7 +8,7 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 
-.PHONY: help up down ps logs status java kotlin install web test test-java test-kotlin build clean reset-db
+.PHONY: help up down ps logs status java kotlin collab install web test test-java test-kotlin test-collab build clean reset-db
 
 help: ## 显示所有目标
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-13s\033[0m %s\n", $$1, $$2}'
@@ -44,6 +44,9 @@ java: ## 起 Java 后端(:18080,Maven)
 kotlin: ## 起 Kotlin 后端(:18081,Gradle)
 	cd kotlin-backend && ./gradlew bootRun
 
+collab: ## 起协作服务(:19082,NestJS + Hocuspocus;默认连 Java 后端)
+	cd collab-server && pnpm install && pnpm dev
+
 # ---- 前端 ----
 install: ## 安装前端依赖
 	cd frontend && pnpm install
@@ -60,14 +63,19 @@ test-java: ## Java 后端测试(Testcontainers)
 test-kotlin: ## Kotlin 后端测试(Testcontainers)
 	cd kotlin-backend && ./gradlew test
 
+test-collab: ## 协作服务类型检查
+	cd collab-server && pnpm install && pnpm typecheck
+
 build: ## 前端类型检查 + 打包
 	cd frontend && pnpm install && pnpm build
+	cd collab-server && pnpm install && pnpm build
 
 # ---- 清理 / 维护 ----
 clean: ## 清理各端构建产物
 	-cd java-backend && ./mvnw -q clean
 	-cd kotlin-backend && ./gradlew -q clean
 	rm -rf frontend/dist
+	rm -rf collab-server/dist
 
 reset-db: ## 清空两套 schema(危险:会删数据)
 	docker compose exec mysql mysql -uroot -p$${MYSQL_ROOT_PASSWORD:-rootpass} -e "\
