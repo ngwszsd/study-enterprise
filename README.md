@@ -7,8 +7,8 @@ Java / Kotlin 双语言企业级全链路学习项目:登陆(JWT)· 文章 CRUD 
 ```bash
 make          # 列出所有命令
 make up       # 起 MySQL + MinIO + Redis
-make java     # Java 后端 :8080      make kotlin  # Kotlin 后端 :8081
-make web      # 前端 :5173           make test    # 两套后端测试
+make java     # Java 后端 :18080     make kotlin  # Kotlin 后端 :18081
+make web      # 前端 :15173          make test    # 两套后端测试
 ```
 
 完整说明见 [`AGENTS.md`](./AGENTS.md)。

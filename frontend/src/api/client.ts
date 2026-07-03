@@ -2,7 +2,7 @@ import axios from 'axios'
 import { clearToken, getToken } from '../auth/token'
 import type { ApiError } from './types'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080'
+const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:18080'
 
 export const api = axios.create({ baseURL })
 

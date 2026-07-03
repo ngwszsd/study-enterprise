@@ -36,9 +36,9 @@ study-enterprise/
 ├── docker-compose.yml         # MySQL + MinIO + Redis
 ├── .env.example               # 复制为 .env 使用
 ├── infra/mysql/init/          # 建两套 schema
-├── java-backend/              # Spring Boot(Java):8080
-├── kotlin-backend/            # Spring Boot(Kotlin):8081
-└── frontend/                  # React + Vite + Tailwind:5173
+├── java-backend/              # Spring Boot(Java):18080
+├── kotlin-backend/            # Spring Boot(Kotlin):18081
+└── frontend/                  # React + Vite + Tailwind:15173
 ```
 
 Java 后端包结构:`domain / mapper / service / storage / cache / security / config / web(controller+dto) / exception`。
@@ -47,12 +47,12 @@ Java 后端包结构:`domain / mapper / service / storage / cache / security / c
 
 | 服务 | 端口 |
 |---|---|
-| Java 后端 | 8080 |
-| Kotlin 后端 | 8081 |
-| MySQL | 3306 |
-| MinIO API / Console | 9000 / 9001 |
-| Redis | 6379 |
-| 前端 Vite | 5173 |
+| Java 后端 | 18080 |
+| Kotlin 后端 | 18081 |
+| MySQL | 13306 |
+| MinIO API / Console | 19100 / 19101 |
+| Redis | 16379 |
+| 前端 Vite | 15173 |
 
 ## 5. 如何运行
 
@@ -60,11 +60,11 @@ Java 后端包结构:`domain / mapper / service / storage / cache / security / c
 
 ```bash
 make up        # 起 MySQL + MinIO + Redis
-make java      # Java 后端 :8080
-make kotlin    # Kotlin 后端 :8081
-make web       # 前端 :5173
+make java      # Java 后端 :18080
+make kotlin    # Kotlin 后端 :18081
+make web       # 前端 :15173
 make test      # 两套后端测试
-# 端口被占用时:SERVER_PORT=8090 REDIS_PORT=6380 make java
+# 端口被占用时:SERVER_PORT=18090 REDIS_PORT=16380 make java
 ```
 
 等价的手工命令:
@@ -73,19 +73,19 @@ make test      # 两套后端测试
 cp .env.example .env
 docker compose up -d           # 起 mysql + minio + redis(首次自动建两库)
 
-# Java 后端(:8080)
+# Java 后端(:18080)
 cd java-backend && ./mvnw spring-boot:run
 #   跑测试(Testcontainers 起 MySQL+Redis,需 Docker):./mvnw test
 
-# Kotlin 后端(:8081)—— Gradle
+# Kotlin 后端(:18081)—— Gradle
 cd kotlin-backend && ./gradlew bootRun
 #   跑测试:./gradlew test
 
-# 前端(:5173)
+# 前端(:15173)
 cd frontend && pnpm install && pnpm dev
 ```
 
-MinIO 控制台:http://localhost:9001(`minioadmin` / `minioadmin123`)。
+MinIO 控制台:http://localhost:19101(`minioadmin` / `minioadmin123`)。
 
 ## 6. 环境变量
 

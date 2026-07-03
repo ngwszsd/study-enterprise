@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext'
 import { getToken } from '../auth/token'
 import { Button, Input } from '../components/ui'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080'
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:18080'
 const WS_BASE = API_BASE.replace(/^http/, 'ws')
 
 interface ChatMsg {

@@ -2,7 +2,7 @@ spring:
   application:
     name: kotlin-backend
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME_KOTLIN:study_kotlin}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:13306}/${DB_NAME_KOTLIN:study_kotlin}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8
     username: ${DB_USERNAME:study}
     password: ${DB_PASSWORD:study_pass}
   flyway:
@@ -10,14 +10,14 @@ spring:
   data:
     redis:
       host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      port: ${REDIS_PORT:16379}
   servlet:
     multipart:
       max-file-size: 5MB
       max-request-size: 6MB
 
 server:
-  port: ${SERVER_PORT:8081}
+  port: ${SERVER_PORT:18081}
 
 mybatis-plus:
   configuration:
@@ -32,7 +32,7 @@ jwt:
   expires-in: ${JWT_EXPIRES_IN:3600}
 
 minio:
-  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  endpoint: ${MINIO_ENDPOINT:http://localhost:19100}
   access-key: ${MINIO_ACCESS_KEY:minioadmin}
   secret-key: ${MINIO_SECRET_KEY:minioadmin123}
   bucket: ${MINIO_BUCKET:study}

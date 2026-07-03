@@ -1,9 +1,9 @@
 # study-enterprise 启动/管理入口
 # 用法:make <目标>   例:make up · make java · make kotlin · make web · make test
-# 端口:Java 8080 · Kotlin 8081 · MySQL 3306 · MinIO 9000/9001 · Redis 6379 · 前端 5173
+# 端口(均 10000+,减少与其它服务冲突):
+#   Java 18080 · Kotlin 18081 · MySQL 13306 · MinIO 19100/19101 · Redis 16379 · 前端 15173
 # 端口被占用时用环境变量前缀覆盖(会自动传给应用),例:
-#   SERVER_PORT=8090 REDIS_PORT=6380 make java
-#   SERVER_PORT=8091 REDIS_PORT=6380 make kotlin
+#   SERVER_PORT=18090 REDIS_PORT=16380 make java
 
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
@@ -32,23 +32,23 @@ status: ## 查看基础设施 + 各服务运行状态
 	@echo "== 基础设施(Docker)=="
 	@docker compose ps 2>/dev/null || true
 	@echo "== 应用(默认端口)=="
-	@c=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:8080/actuator/health); [ "$$c" = 000 ] && echo "  ⛔ Java 后端    :8080  未运行" || echo "  ✅ Java 后端    :8080  运行中 (HTTP $$c)"
-	@c=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:8081/actuator/health); [ "$$c" = 000 ] && echo "  ⛔ Kotlin 后端  :8081  未运行" || echo "  ✅ Kotlin 后端  :8081  运行中 (HTTP $$c)"
-	@c=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:5173/); [ "$$c" = 000 ] && echo "  ⛔ 前端         :5173  未运行" || echo "  ✅ 前端         :5173  运行中 (HTTP $$c)"
-	@c=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:9001/); [ "$$c" = 000 ] && echo "  ⛔ MinIO 控制台 :9001  未运行" || echo "  ✅ MinIO 控制台 :9001  运行中 (HTTP $$c)"
+	@c=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:18080/actuator/health); [ "$$c" = 000 ] && echo "  ⛔ Java 后端    :18080  未运行" || echo "  ✅ Java 后端    :18080  运行中 (HTTP $$c)"
+	@c=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:18081/actuator/health); [ "$$c" = 000 ] && echo "  ⛔ Kotlin 后端  :18081  未运行" || echo "  ✅ Kotlin 后端  :18081  运行中 (HTTP $$c)"
+	@c=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:15173/); [ "$$c" = 000 ] && echo "  ⛔ 前端         :15173  未运行" || echo "  ✅ 前端         :15173  运行中 (HTTP $$c)"
+	@c=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:19101/); [ "$$c" = 000 ] && echo "  ⛔ MinIO 控制台 :19101  未运行" || echo "  ✅ MinIO 控制台 :19101  运行中 (HTTP $$c)"
 
 # ---- 后端 ----
-java: ## 起 Java 后端(:8080,Maven)
+java: ## 起 Java 后端(:18080,Maven)
 	cd java-backend && ./mvnw spring-boot:run
 
-kotlin: ## 起 Kotlin 后端(:8081,Gradle)
+kotlin: ## 起 Kotlin 后端(:18081,Gradle)
 	cd kotlin-backend && ./gradlew bootRun
 
 # ---- 前端 ----
 install: ## 安装前端依赖
 	cd frontend && pnpm install
 
-web: install ## 起前端 dev 服务(:5173)
+web: install ## 起前端 dev 服务(:15173)
 	cd frontend && pnpm dev
 
 # ---- 测试 / 构建 ----

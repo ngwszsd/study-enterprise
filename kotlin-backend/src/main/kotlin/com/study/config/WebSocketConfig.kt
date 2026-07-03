@@ -18,6 +18,6 @@ class WebSocketConfig(
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         registry.addHandler(chatHandler, "/ws/chat")
             .addInterceptors(authInterceptor)
-            .setAllowedOrigins("http://localhost:5173")
+            .setAllowedOrigins("http://localhost:15173")
     }
 }

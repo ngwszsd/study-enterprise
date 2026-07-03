@@ -45,7 +45,7 @@ class SecurityConfig(private val jwtService: JwtService) {
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration()
-        config.allowedOrigins = listOf("http://localhost:5173")
+        config.allowedOrigins = listOf("http://localhost:15173")
         config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         config.allowedHeaders = listOf("*")
         config.allowCredentials = true
