@@ -18,7 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/** 认证接口:注册、登陆、当前用户。 */
+/**
+ * 认证接口:注册、登陆、当前用户(/api/auth/**)。
+ *
+ * 【前端类比】相当于 frontend/src/api/auth.ts 的服务端另一端 —— 你前端的 login()/register()/me()
+ * 调的就是这里的方法。Controller 只管 HTTP(URL、方法、参数校验、返回),真正的业务交给 Service。
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

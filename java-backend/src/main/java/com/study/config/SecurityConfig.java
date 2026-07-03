@@ -19,7 +19,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-/** 无状态安全配置:JWT 过滤器 + BCrypt + CORS,统一 401/403 JSON。 */
+/**
+ * 安全配置:声明"哪些接口要登陆、哪些放行",装配 JWT 过滤器、密码加密器、CORS,统一 401/403 JSON。
+ *
+ * 【前端类比】authorizeHttpRequests 就是"路由守卫"的服务端版(哪些 URL 需登陆);cors 对应前端跨域许可;
+ * 无状态(STATELESS)= 不用服务端 session,身份全靠每次请求带的 JWT。
+ */
 @Configuration
 public class SecurityConfig {
 

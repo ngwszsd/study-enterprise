@@ -11,7 +11,12 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 
-/** SSE 通知流:文章创建时向所有连接单向推送(浏览器用 EventSource,token 走查询参数)。 */
+/**
+ * SSE 通知流:文章创建时向所有连接单向推送(服务端 → 客户端)。
+ *
+ * 【前端类比】你前端 new EventSource('.../api/sse/notifications') 连的就是这里。SseEmitter 是一条保持打开的
+ * HTTP 长连接;监听 ArticleCreatedEvent 就往所有 emitter 发 article-created 事件。token 走查询参数。
+ */
 @RestController
 @RequestMapping("/api/sse")
 class NotificationController(private val jwtService: JwtService) {

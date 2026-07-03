@@ -10,7 +10,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** 认证业务:注册、登陆签发令牌。 */
+/**
+ * 认证业务:注册、登陆签发令牌。
+ *
+ * 【前端类比】像组件里的业务逻辑 / 自定义 hook —— 真正"干活"的层。做规则校验(用户名是否重复)、
+ * 密码加密(BCrypt)、签发 JWT。Controller 负责收发,把活儿交给它。
+ */
 @Service
 public class AuthService {
 

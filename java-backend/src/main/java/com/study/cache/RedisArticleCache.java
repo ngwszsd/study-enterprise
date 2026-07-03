@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
  * 1) 文章详情缓存(读穿透 + 10 分钟 TTL,写时失效);
  * 2) 文章浏览量计数(INCR)。
  * 注入 Boot 提供的 ObjectMapper(已含 JavaTimeModule,LocalDateTime 走 ISO 字符串)。
+ *
+ * 【前端类比】像 react-query / SWR 的缓存:先看缓存有没有,没有再查库并写回,数据变了就让缓存失效。
+ * key 带应用名前缀(java-backend: / kotlin-backend:),避免两套后端共用一个 Redis 时撞键。
  */
 @Component
 public class RedisArticleCache {

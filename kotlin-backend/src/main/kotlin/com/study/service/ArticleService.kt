@@ -18,7 +18,12 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-/** 文章业务:CRUD + 分页搜索 + 作者归属校验 + Redis 缓存/浏览量。 */
+/**
+ * 文章业务:CRUD + 分页搜索 + 作者归属校验 + Redis 缓存/浏览量 + 发布领域事件。
+ *
+ * 【前端类比】业务层(像业务 hook):@Transactional 事务、Redis 缓存读、发 ArticleCreatedEvent 让 WS/SSE
+ * 实时推送(发布-订阅,类似前端事件总线)。逻辑与 Java 侧一致,写法更简洁(空安全 ?.、apply、data class)。
+ */
 @Service
 class ArticleService(
     private val articleMapper: ArticleMapper,

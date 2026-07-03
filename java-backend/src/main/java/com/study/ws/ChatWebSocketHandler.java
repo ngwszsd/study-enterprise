@@ -15,7 +15,12 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-/** WebSocket 聊天室:客户端互发消息广播;文章创建时推送系统消息。 */
+/**
+ * WebSocket 聊天室:客户端互发消息广播;文章创建时推送系统消息。
+ *
+ * 【前端类比】你前端 new WebSocket('ws://.../ws/chat') 连的就是这里。TextWebSocketHandler 的三个回调
+ * = 连接建立 / 收到消息 / 连接关闭。这里维护所有在线会话,收到一条就广播给全部人(双向通信)。
+ */
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 

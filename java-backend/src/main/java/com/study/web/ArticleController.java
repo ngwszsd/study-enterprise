@@ -21,7 +21,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/** 文章接口:分页列表/详情/新建/更新/删除。均需登陆;写操作需作者本人。 */
+/**
+ * 文章接口:分页列表/详情/新建/更新/删除(/api/articles/**)。均需登陆;改删需作者本人。
+ *
+ * 【前端类比】对应 frontend/src/api/articles.ts。@AuthenticationPrincipal 拿到的当前用户,就是
+ * JWT 过滤器解出来放进去的(前端不用传 userId,服务端从 token 里认)。
+ */
 @RestController
 @RequestMapping("/api/articles")
 public class ArticleController {

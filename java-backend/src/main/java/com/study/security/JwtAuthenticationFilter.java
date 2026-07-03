@@ -16,8 +16,11 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * 解析 Authorization: Bearer <token>,校验通过则把 AuthUser 放入 SecurityContext。
- * 不加 @Component,由 SecurityConfig 手动 new,避免被 Boot 自动注册进 servlet 过滤链。
+ * JWT 认证过滤器:每个请求进业务前先过这里,从 Authorization: Bearer &lt;token&gt; 解出"你是谁"。
+ *
+ * 【前端类比】就是 axios 拦截器的服务端反向版 —— 前端拦截器给请求"加"token,这里拦截请求"验"token。
+ * 校验通过就把当前用户放进 SecurityContext(后面 @AuthenticationPrincipal 就能拿到);失败则不设身份,
+ * 交给安全链返回 401。(故意不加 @Component,由 SecurityConfig 手动 new,避免被 Boot 当普通 servlet 过滤器重复注册。)
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 

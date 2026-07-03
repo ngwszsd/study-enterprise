@@ -7,7 +7,12 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.time.LocalDateTime;
 
-/** 用户实体(MyBatis-Plus)。驼峰字段自动映射下划线列(password_hash 等)。 */
+/**
+ * 用户实体 —— 对应数据库 users 表的一行。
+ *
+ * 【前端类比】像一个 TS model/interface,但它"绑"到了数据库表:驼峰字段(passwordHash)自动映射
+ * 下划线列(password_hash)。@TableId 标主键自增,@TableField(fill=...) 让 createdAt 在插入时自动填。
+ */
 @TableName("users")
 public class User {
 

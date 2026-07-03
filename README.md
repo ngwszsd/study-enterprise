@@ -11,4 +11,6 @@ make java     # Java 后端 :18080     make kotlin  # Kotlin 后端 :18081
 make web      # 前端 :15173          make test    # 两套后端测试
 ```
 
+📖 **前端转全栈的同学先读**:[前端转全栈导读](./docs/frontend-to-fullstack.md)(把后端每个概念翻译成你熟悉的前端东西 + 读代码顺序)。
+
 完整说明见 [`AGENTS.md`](./AGENTS.md)。
