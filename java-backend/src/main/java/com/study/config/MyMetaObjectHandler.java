@@ -5,7 +5,11 @@ import java.time.LocalDateTime;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
 
-/** 自动填充:插入填 createdAt/updatedAt,更新填 updatedAt(strict 会跳过实体上不存在的字段)。 */
+/**
+ * 自动填充:插入填 createdAt/updatedAt,更新填 updatedAt(strict 会跳过实体上不存在的字段)。
+ *
+ * @Component 是最通用的 Spring 组件注解,作用接近 Nest @Injectable:交给容器创建并被框架发现。
+ */
 @Component
 public class MyMetaObjectHandler implements MetaObjectHandler {
 

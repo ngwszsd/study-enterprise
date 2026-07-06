@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": 1783074755245,
+  "generatedAt": 1783303907624,
   "entries": [
     {
       "id": "spec:project:architecture-constraints",
@@ -72,7 +72,7 @@
       ],
       "status": "active",
       "created": "2026-07-03T07:19:16.424Z",
-      "updated": "2026-07-03T09:58:49.016Z",
+      "updated": "2026-07-03T10:35:20.000Z",
       "scope": "project",
       "category": "debug",
       "specCategory": null,
@@ -99,7 +99,7 @@
       ],
       "status": "active",
       "created": "2026-07-03T07:19:16.424Z",
-      "updated": "2026-07-03T09:58:49.016Z",
+      "updated": "2026-07-03T10:35:20.000Z",
       "scope": "project",
       "category": "debug",
       "specCategory": null,
@@ -125,7 +125,34 @@
       ],
       "status": "active",
       "created": "2026-07-03T07:19:16.424Z",
-      "updated": "2026-07-03T09:58:49.016Z",
+      "updated": "2026-07-03T10:35:20.000Z",
+      "scope": "project",
+      "category": "debug",
+      "specCategory": null,
+      "createdBy": null,
+      "sourceRef": null,
+      "parent": "spec:project:debug-notes",
+      "related": [],
+      "source": {
+        "kind": "file",
+        "path": "specs/debug-notes.md"
+      }
+    },
+    {
+      "id": "spec:project:debug-notes-003",
+      "type": "spec",
+      "title": "TipTap CollaborationCaret updateUser timing",
+      "summary": "Avoid updateUser timing crash in collaborative editor",
+      "tags": [
+        "tiptap",
+        "collaboration-caret",
+        "hocuspocus",
+        "awareness",
+        "updateuser"
+      ],
+      "status": "active",
+      "created": "2026-07-03T07:19:16.424Z",
+      "updated": "2026-07-03T10:35:20.000Z",
       "scope": "project",
       "category": "debug",
       "specCategory": null,

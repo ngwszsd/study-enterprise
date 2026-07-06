@@ -10,7 +10,11 @@ import java.util.Date
 import javax.crypto.SecretKey
 import org.springframework.stereotype.Service
 
-/** JWT 签发与校验(HS 系列,密钥长度自动决定算法强度)。 */
+/**
+ * JWT 签发与校验(HS 系列,密钥长度自动决定算法强度)。
+ *
+ * @Service 让安全工具服务也交给 Spring 容器管理,供 AuthService、过滤器、SSE 等复用。
+ */
 @Service
 class JwtService(properties: JwtProperties) {
 

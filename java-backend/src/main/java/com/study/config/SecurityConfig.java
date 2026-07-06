@@ -25,6 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  * 【前端类比】authorizeHttpRequests 就是"路由守卫"的服务端版(哪些 URL 需登陆);cors 对应前端跨域许可;
  * 无状态(STATELESS)= 不用服务端 session,身份全靠每次请求带的 JWT。
  */
+// @Configuration: 声明这是配置类,里面的 @Bean 方法会参与 Spring 容器装配。
 @Configuration
 public class SecurityConfig {
 
@@ -34,6 +35,7 @@ public class SecurityConfig {
         this.jwtService = jwtService;
     }
 
+    // @Bean: 把返回的 SecurityFilterChain 注册进 Spring 容器,由 Spring Security 自动使用。
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -52,11 +54,13 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // @Bean: PasswordEncoder 是一个可注入依赖,AuthService 会用它做 BCrypt 加密/校验。
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // @Bean: CORS 配置也作为 Bean 提供给 Spring Security。
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();

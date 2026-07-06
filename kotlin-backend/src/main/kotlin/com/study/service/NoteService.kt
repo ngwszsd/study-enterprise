@@ -19,7 +19,15 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-/** 实时协作笔记业务:元数据、成员权限、协作 token、Yjs 快照持久化。 */
+/**
+ * 实时协作笔记业务:元数据、成员权限、协作 token、Yjs 快照持久化。
+ *
+ * 设计重点:
+ * - Spring 后端是权限和数据的事实源,负责 note/note_members/note_documents 三张表;
+ * - Nest/Hocuspocus 只负责实时同步,每次连接前必须拿这里签发的短期 collab token;
+ * - Yjs 文档是二进制 update,数据库用 BLOB,接口层用 Base64 包一层。
+ */
+// @Service: 让 NoteService 成为可注入的业务 Bean;Controller 不手动 new,由 Spring 容器装配。
 @Service
 class NoteService(
     private val noteMapper: NoteMapper,
@@ -27,12 +35,14 @@ class NoteService(
     private val noteDocumentMapper: NoteDocumentMapper,
     private val userMapper: UserMapper,
     private val jwtService: JwtService,
-    @Value("\${collab.url:ws://localhost:19082}") private val collabUrl: String,
+    // @Value: 从配置读取协作服务地址,用于返回给前端连接 Hocuspocus。
+    @Value("\${collab.url:ws://localhost:19082/collab/notes}") private val collabUrl: String,
 ) {
     companion object {
         private const val COLLAB_TOKEN_TTL_SECONDS = 300L
     }
 
+    // @Transactional(readOnly = true): 只读事务,用于成员/笔记查询和权限校验。
     @Transactional(readOnly = true)
     fun list(userId: Long): List<NoteResponse> {
         val memberships = noteMemberMapper.selectList(
@@ -53,8 +63,10 @@ class NoteService(
         return toResponse(note, role)
     }
 
+    // @Transactional: 创建笔记、OWNER 成员、空文档快照必须在一个事务内成功或回滚。
     @Transactional
     fun create(request: NoteRequest, ownerId: Long): NoteResponse {
+        // 创建笔记时同时创建 OWNER 成员和空文档快照,保证后续协作服务一定能 load 到记录。
         val note = Note().apply {
             title = request.title
             this.ownerId = ownerId
@@ -131,6 +143,7 @@ class NoteService(
 
     @Transactional(readOnly = true)
     fun collabToken(noteId: Long, userId: Long, username: String): CollabTokenResponse {
+        // 普通登录 JWT 只给业务 API 使用;协作 WS 只认 typ=collab 的短期 token,降低泄漏后的影响面。
         val role = requireRole(noteId, userId)
         if (role == "VIEWER") {
             throw ForbiddenException("只读成员暂不能进入协作编辑")
@@ -141,6 +154,7 @@ class NoteService(
 
     @Transactional(readOnly = true)
     fun loadDocumentState(noteId: Long): String {
+        // 内部接口也先确认笔记存在,避免协作服务创建不存在的野文档。
         requireNote(noteId)
         val state = noteDocumentMapper.selectState(noteId)?.ydocState
         return if (state == null || state.isEmpty()) "" else Base64.getEncoder().encodeToString(state)
@@ -148,6 +162,7 @@ class NoteService(
 
     @Transactional
     fun saveDocumentState(noteId: Long, base64State: String?) {
+        // Hocuspocus 存的是 Yjs update 二进制;HTTP JSON 层传 Base64,到库前转回 ByteArray。
         requireNote(noteId)
         val state = if (base64State.isNullOrBlank()) ByteArray(0) else Base64.getDecoder().decode(base64State)
         val updated = noteDocumentMapper.updateState(noteId, state)

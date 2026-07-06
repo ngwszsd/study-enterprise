@@ -17,12 +17,14 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
  * 【前端类比】你前端 new EventSource('.../api/sse/notifications') 连的就是这里。SseEmitter 是一条保持打开的
  * HTTP 长连接;监听 ArticleCreatedEvent 就往所有 emitter 发 article-created 事件。token 走查询参数。
  */
+// @RestController + @RequestMapping: 声明 /api/sse 下的 SSE 接口。
 @RestController
 @RequestMapping("/api/sse")
 class NotificationController(private val jwtService: JwtService) {
 
     private val emitters = ConcurrentHashMap.newKeySet<SseEmitter>()
 
+    // @GetMapping: 建立 SSE 长连接;@RequestParam 从查询参数读取 token。
     @GetMapping("/notifications")
     fun notifications(@RequestParam token: String): SseEmitter {
         try {
@@ -42,6 +44,7 @@ class NotificationController(private val jwtService: JwtService) {
         return emitter
     }
 
+    // @EventListener: 监听 Spring 应用内事件,这里接收 ArticleService 发布的 ArticleCreatedEvent。
     @EventListener
     fun onArticleCreated(event: ArticleCreatedEvent) {
         emitters.forEach { emitter ->

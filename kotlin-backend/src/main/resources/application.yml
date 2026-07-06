@@ -38,5 +38,5 @@ minio:
   bucket: ${MINIO_BUCKET:study}
 
 collab:
-  url: ${COLLAB_URL:ws://localhost:19082}
+  url: ${COLLAB_URL:ws://localhost:19082/collab/notes}
   internal-secret: ${COLLAB_INTERNAL_SECRET:dev-collab-secret}

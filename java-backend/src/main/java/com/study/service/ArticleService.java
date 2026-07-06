@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 【前端类比】业务层(像业务 hook)。这里集中体现了几个后端要点:@Transactional 事务、用 Redis 缓存读、
  * 发 ArticleCreatedEvent 让 WebSocket/SSE 去实时推送(发布-订阅,类似前端事件总线 mitt)。
  */
+// @Service: Spring 的业务层组件注解,作用和 Nest @Injectable 类似,都是交给容器创建和注入。
 @Service
 public class ArticleService {
 
@@ -47,6 +48,7 @@ public class ArticleService {
         this.eventPublisher = eventPublisher;
     }
 
+    // @Transactional(readOnly = true): 查询事务;列表读取不写库。
     @Transactional(readOnly = true)
     public PageResponse<ArticleResponse> list(String keyword, int page, int size) {
         // MyBatis-Plus 分页 current 从 1 开始;对外仍用 0 基页码
@@ -84,6 +86,7 @@ public class ArticleService {
         return toResponse(article, usernameOf(article.getAuthorId()), views);
     }
 
+    // @Transactional: 写操作事务;插入文章和发布事件前的数据库写入要保持一致。
     @Transactional
     public ArticleResponse create(ArticleRequest request, Long authorId) {
         Article article = new Article();

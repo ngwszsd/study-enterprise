@@ -44,7 +44,7 @@ java: ## 起 Java 后端(:18080,Maven)
 kotlin: ## 起 Kotlin 后端(:18081,Gradle)
 	cd kotlin-backend && ./gradlew bootRun
 
-collab: ## 起协作服务(:19082,NestJS + Hocuspocus;默认连 Java 后端)
+collab: ## 起协作服务(:19082/collab/notes,NestJS + Hocuspocus;默认连 Java 后端)
 	cd collab-server && pnpm install && pnpm dev
 
 # ---- 前端 ----

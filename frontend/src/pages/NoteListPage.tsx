@@ -70,7 +70,7 @@ export default function NoteListPage() {
             <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">Yjs 文档同步、Hocuspocus 鉴权、Spring 持久化快照。</p>
           </div>
           <Chip variant="soft" color="success">
-            ws://localhost:19082
+            ws://localhost:19082/collab/notes
           </Chip>
         </section>
 

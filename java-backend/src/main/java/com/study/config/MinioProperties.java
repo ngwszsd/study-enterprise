@@ -2,7 +2,11 @@ package com.study.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/** MinIO 配置,绑定 minio.* 。 */
+/**
+ * MinIO 配置,绑定 minio.* 。
+ *
+ * @ConfigurationProperties 把 minio.endpoint/access-key/secret-key/bucket 绑定到这个对象。
+ */
 @ConfigurationProperties(prefix = "minio")
 public class MinioProperties {
 

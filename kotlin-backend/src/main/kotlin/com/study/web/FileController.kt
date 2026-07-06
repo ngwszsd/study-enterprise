@@ -12,11 +12,16 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
-/** 文件接口:上传到 MinIO、按 key 取预签名 URL。均需登陆。 */
+/**
+ * 文件接口:上传到 MinIO、按 key 取预签名 URL。均需登陆。
+ *
+ * @RestController 返回 JSON;@RequestMapping 统一声明 /api/files 前缀。
+ */
 @RestController
 @RequestMapping("/api/files")
 class FileController(private val storageService: StorageService) {
 
+    // @RequestParam("file"): 读取 multipart/form-data 里的文件字段。
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun upload(@RequestParam("file") file: MultipartFile): FileResponse {

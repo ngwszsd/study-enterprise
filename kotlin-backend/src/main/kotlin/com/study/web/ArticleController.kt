@@ -20,11 +20,16 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
-/** 文章接口:分页列表/详情/新建/更新/删除。均需登陆;写操作需作者本人。 */
+/**
+ * 文章接口:分页列表/详情/新建/更新/删除。均需登陆;写操作需作者本人。
+ *
+ * @RestController 返回 JSON;@RequestMapping 给所有函数统一加 /api/articles 前缀。
+ */
 @RestController
 @RequestMapping("/api/articles")
 class ArticleController(private val articleService: ArticleService) {
 
+    // @GetMapping: 处理 GET /api/articles;@RequestParam 读取 query 参数。
     @GetMapping
     fun list(
         @RequestParam(defaultValue = "0") page: Int,
@@ -35,9 +40,11 @@ class ArticleController(private val articleService: ArticleService) {
     @GetMapping("/stats")
     fun stats(): List<CategoryCount> = articleService.stats()
 
+    // @PathVariable: 读取路径里的 {id},例如 GET /api/articles/1。
     @GetMapping("/{id}")
     fun get(@PathVariable id: Long): ArticleResponse = articleService.get(id)
 
+    // @RequestBody 读取 JSON 正文;@AuthenticationPrincipal 读取当前登录用户。
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun create(@Valid @RequestBody request: ArticleRequest, @AuthenticationPrincipal user: AuthUser): ArticleResponse =

@@ -9,14 +9,19 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
 
 /**
- * 用 Redis 做两件事(手动序列化):
+ * 用 Redis 做两件事(手动序列化,完全可控):
  * 1) 文章详情缓存(读穿透 + 10 分钟 TTL,写时失效);
  * 2) 文章浏览量计数(INCR)。
+ *
+ * 【前端类比】像 react-query / SWR 的缓存:先看缓存有没有,没有再查库并写回,数据变了就让缓存失效。
+ * key 带应用名前缀(java-backend: / kotlin-backend:),避免两套后端共用一个 Redis 时撞键。
  */
+// @Component: 通用组件 Bean。这里不是典型业务 Service,所以用 Component 更贴合职责。
 @Component
 class RedisArticleCache(
     private val redis: StringRedisTemplate,
     private val objectMapper: ObjectMapper,
+    // @Value: 注入 spring.application.name,用于拼 Redis key 命名空间。
     @Value("\${spring.application.name}") appName: String,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)

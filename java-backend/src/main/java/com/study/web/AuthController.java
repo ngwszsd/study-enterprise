@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
  * 【前端类比】相当于 frontend/src/api/auth.ts 的服务端另一端 —— 你前端的 login()/register()/me()
  * 调的就是这里的方法。Controller 只管 HTTP(URL、方法、参数校验、返回),真正的业务交给 Service。
  */
+// @RestController: @Controller + @ResponseBody,方法返回对象会自动序列化成 JSON。
+// @RequestMapping: 给这个 Controller 下所有接口统一加 /api/auth 前缀。
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -36,6 +38,8 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
+    // @PostMapping: 处理 POST /api/auth/register;@ResponseStatus 指定成功时返回 201。
+    // @Valid + @RequestBody: 把请求 JSON 绑定成 RegisterRequest,并执行 DTO 上的校验注解。
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse register(@Valid @RequestBody RegisterRequest request) {
@@ -43,12 +47,14 @@ public class AuthController {
         return new UserResponse(user.getId(), user.getUsername());
     }
 
+    // @PostMapping: 处理 POST /api/auth/login。
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         String token = authService.login(request.username(), request.password());
         return new AuthResponse(token, "Bearer", jwtService.getExpiresInSeconds());
     }
 
+    // @AuthenticationPrincipal: 从 Spring SecurityContext 取当前登录用户,不需要前端传 userId。
     @GetMapping("/me")
     public UserResponse me(@AuthenticationPrincipal AuthUser user) {
         return new UserResponse(user.id(), user.username());

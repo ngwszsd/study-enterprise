@@ -7,10 +7,15 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.time.LocalDateTime;
 
-/** 协作笔记元数据。正文由 Yjs 文档快照保存到 note_documents。 */
+/**
+ * 协作笔记元数据。正文由 Yjs 文档快照保存到 note_documents。
+ *
+ * @TableName 绑定 notes 表;@TableId/@TableField 负责主键和时间字段映射。
+ */
 @TableName("notes")
 public class Note {
 
+    // @TableId(type = AUTO): 主键由 MySQL 自增生成。
     @TableId(type = IdType.AUTO)
     private Long id;
 
@@ -18,9 +23,11 @@ public class Note {
 
     private Long ownerId;
 
+    // @TableField(fill = INSERT): 插入时自动填 created_at。
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
+    // @TableField(fill = INSERT_UPDATE): 插入/更新时自动填 updated_at。
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
 

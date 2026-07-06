@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 【前端类比】像组件里的业务逻辑 / 自定义 hook —— 真正"干活"的层。做规则校验(用户名是否重复)、
  * 密码加密(BCrypt)、签发 JWT。Controller 负责收发,把活儿交给它。
  */
+// @Service: 标记业务层 Bean,Spring 扫描后放进 IoC 容器;Controller 可通过构造器注入它。
 @Service
 public class AuthService {
 
@@ -29,6 +30,7 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
+    // @Transactional: 方法级事务边界;注册涉及写库,异常时回滚。
     @Transactional
     public User register(String username, String rawPassword) {
         Long count = userMapper.selectCount(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
@@ -43,6 +45,7 @@ public class AuthService {
     }
 
     /** 校验凭据并返回 JWT;失败统一 401(不区分用户不存在还是密码错误)。 */
+    // readOnly=true: 告诉 Spring/数据库这是只读事务,适合查询场景。
     @Transactional(readOnly = true)
     public String login(String username, String rawPassword) {
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));

@@ -18,12 +18,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
-/** 全局异常处理:领域异常翻译为统一错误响应,不吞异常。 */
+/**
+ * 全局异常处理:领域异常翻译为统一错误响应,不吞异常。
+ *
+ * @RestControllerAdvice 会拦截所有 @RestController 抛出的异常,并把返回值写成 JSON。
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    // @ExceptionHandler: 指定这个方法处理哪类异常;@ResponseStatus 指定 HTTP 状态码。
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidation(MethodArgumentNotValidException ex) {

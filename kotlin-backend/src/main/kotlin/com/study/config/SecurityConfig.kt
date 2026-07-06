@@ -22,9 +22,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
  * 【前端类比】authorizeHttpRequests = 路由守卫的服务端版;无状态 = 不用 session,靠每次请求带 JWT。
  * Kotlin 用尾随 lambda(`http.csrf { it.disable() }`),Java 用方法引用,是同一套 DSL。
  */
+// @Configuration: 声明这是配置类,里面的 @Bean 方法会参与 Spring 容器装配。
 @Configuration
 class SecurityConfig(private val jwtService: JwtService) {
 
+    // @Bean: 把返回的 SecurityFilterChain 注册进 Spring 容器,由 Spring Security 自动使用。
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
@@ -45,9 +47,11 @@ class SecurityConfig(private val jwtService: JwtService) {
         return http.build()
     }
 
+    // @Bean: PasswordEncoder 是一个可注入依赖,AuthService 会用它做 BCrypt 加密/校验。
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
+    // @Bean: CORS 配置也作为 Bean 提供给 Spring Security。
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration()

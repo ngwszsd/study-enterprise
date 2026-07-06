@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
  * 打开的 HTTP 长连接;监听到 ArticleCreatedEvent 就往所有 emitter 发一条 article-created 事件。
  * 浏览器 EventSource 不能带 header,所以 token 走查询参数。
  */
+// @RestController + @RequestMapping: 声明 /api/sse 下的 SSE 接口。
 @RestController
 @RequestMapping("/api/sse")
 public class NotificationController {
@@ -32,6 +33,7 @@ public class NotificationController {
         this.jwtService = jwtService;
     }
 
+    // @GetMapping: 建立 SSE 长连接;@RequestParam 从查询参数读取 token。
     @GetMapping("/notifications")
     public SseEmitter notifications(@RequestParam String token) {
         try {
@@ -51,6 +53,7 @@ public class NotificationController {
         return emitter;
     }
 
+    // @EventListener: 监听 Spring 应用内事件,这里接收 ArticleService 发布的 ArticleCreatedEvent。
     @EventListener
     public void onArticleCreated(ArticleCreatedEvent event) {
         for (SseEmitter emitter : emitters) {

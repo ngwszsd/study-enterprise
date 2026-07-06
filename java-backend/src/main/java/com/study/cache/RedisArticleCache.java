@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
  * 【前端类比】像 react-query / SWR 的缓存:先看缓存有没有,没有再查库并写回,数据变了就让缓存失效。
  * key 带应用名前缀(java-backend: / kotlin-backend:),避免两套后端共用一个 Redis 时撞键。
  */
+// @Component: 通用组件 Bean。这里不是典型业务 Service,所以用 Component 更贴合职责。
 @Component
 public class RedisArticleCache {
 
@@ -30,6 +31,7 @@ public class RedisArticleCache {
     private final String keyPrefix;
 
     public RedisArticleCache(StringRedisTemplate redis, ObjectMapper objectMapper,
+                             // @Value: 注入 spring.application.name,用于拼 Redis key 命名空间。
                              @Value("${spring.application.name}") String appName) {
         this.redis = redis;
         this.objectMapper = objectMapper;

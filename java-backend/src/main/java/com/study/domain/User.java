@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @TableName("users")
 public class User {
 
+    // @TableId(type = AUTO): 主键由 MySQL 自增生成。
     @TableId(type = IdType.AUTO)
     private Long id;
 
@@ -24,6 +25,7 @@ public class User {
     /** BCrypt 哈希,绝不存明文。 */
     private String passwordHash;
 
+    // @TableField(fill = INSERT): 插入时由 MyMetaObjectHandler 自动写入创建时间。
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 

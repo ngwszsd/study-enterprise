@@ -44,7 +44,7 @@ study-enterprise/
 ├── infra/mysql/init/          # 建两套 schema
 ├── java-backend/              # Spring Boot(Java):18080
 ├── kotlin-backend/            # Spring Boot(Kotlin):18081
-├── collab-server/             # NestJS + Hocuspocus 协作服务:19082
+├── collab-server/             # NestJS + Hocuspocus 协作服务:19082/collab/notes
 └── frontend/                  # React + Rsbuild + Tailwind + HeroUI:15173
 ```
 
@@ -59,7 +59,7 @@ Java 后端包结构:`domain / mapper / service / storage / cache / security / c
 | MySQL | 13306 |
 | MinIO API / Console | 19100 / 19101 |
 | Redis | 16379 |
-| 协作服务(Hocuspocus) | 19082 |
+| 协作服务(Hocuspocus) | 19082(`/collab/notes`) |
 | 前端 Rsbuild | 15173 |
 
 ## 5. 如何运行
@@ -70,7 +70,7 @@ Java 后端包结构:`domain / mapper / service / storage / cache / security / c
 make up        # 起 MySQL + MinIO + Redis
 make java      # Java 后端 :18080
 make kotlin    # Kotlin 后端 :18081
-make collab    # 协作服务 :19082(默认连 Java 后端)
+make collab    # 协作服务 :19082/collab/notes(默认连 Java 后端)
 make web       # 前端 :15173
 make test      # 两套后端测试
 # 端口被占用时:SERVER_PORT=18090 REDIS_PORT=16380 make java
@@ -90,7 +90,7 @@ cd java-backend && ./mvnw spring-boot:run
 cd kotlin-backend && ./gradlew bootRun
 #   跑测试:./gradlew test
 
-# 协作服务(:19082)—— NestJS + Hocuspocus,默认连 Java 后端
+# 协作服务(:19082/collab/notes)—— NestJS + Hocuspocus,默认连 Java 后端
 cd collab-server && pnpm install && pnpm dev
 #   切 Kotlin 后端:COLLAB_BACKEND_URL=http://localhost:18081 pnpm dev
 
@@ -107,7 +107,7 @@ MinIO 控制台:http://localhost:19101(`minioadmin` / `minioadmin123`)。
 ```bash
 make up       # 终端 1:MySQL + MinIO + Redis
 make java     # 终端 2:Java 后端 :18080
-make collab   # 终端 3:NestJS + Hocuspocus :19082,默认连 Java 后端
+make collab   # 终端 3:NestJS + Hocuspocus :19082/collab/notes,默认连 Java 后端
 make web      # 终端 4:React 前端 :15173
 ```
 
@@ -162,7 +162,7 @@ cd frontend && VITE_API_BASE_URL=http://localhost:18081 pnpm dev
 | POST | `/api/notes/{id}/members` | `{userId,role}` 添加/更新 EDITOR/VIEWER(需 OWNER) |
 | DELETE | `/api/notes/{id}/members/{userId}` | 移除成员(需 OWNER) |
 | POST | `/api/notes/{id}/collab-token` | 换 5 分钟短期协作 token,供 Hocuspocus 鉴权 |
-| WS | `ws://localhost:19082` | Hocuspocus 协作连接,文档名 `note:{id}`,token 用 `/collab-token` 返回值 |
+| WS | `ws://localhost:19082/collab/notes` | Hocuspocus 协作连接,文档名 `note:{id}`,token 用 `/collab-token` 返回值 |
 | WS | `/ws/chat?token=` | **WebSocket** 聊天室(握手 token 鉴权,双向广播;新文章推系统消息) |
 | GET | `/api/sse/notifications?token=` | **SSE** 通知流(EventSource;新文章实时推送 `article-created`) |
 

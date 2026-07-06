@@ -9,7 +9,11 @@ import org.springframework.stereotype.Component
 import org.springframework.web.socket.WebSocketHandler
 import org.springframework.web.socket.server.HandshakeInterceptor
 
-/** WS 握手鉴权:从 ?token= 取 JWT 校验(浏览器 WS 不能带 header),通过则把 username 放进会话属性。 */
+/**
+ * WS 握手鉴权:从 ?token= 取 JWT 校验(浏览器 WS 不能带 header),通过则把 username 放进会话属性。
+ *
+ * @Component 注册成 Spring Bean,WebSocketConfig 通过构造器注入后挂到 /ws/chat。
+ */
 @Component
 class WebSocketAuthInterceptor(private val jwtService: JwtService) : HandshakeInterceptor {
 

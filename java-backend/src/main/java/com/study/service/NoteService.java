@@ -24,7 +24,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** 实时协作笔记业务:元数据、成员权限、协作 token、Yjs 快照持久化。 */
+/**
+ * 实时协作笔记业务:元数据、成员权限、协作 token、Yjs 快照持久化。
+ *
+ * 设计重点:
+ * - Spring 后端是权限和数据的事实源,负责 note/note_members/note_documents 三张表;
+ * - Nest/Hocuspocus 只负责实时同步,每次连接前必须拿这里签发的短期 collab token;
+ * - Yjs 文档是二进制 update,数据库用 BLOB,接口层用 Base64 包一层。
+ */
+// @Service: 让 NoteService 成为可注入的业务 Bean;Controller 不手动 new,由 Spring 容器装配。
 @Service
 public class NoteService {
 
@@ -42,7 +50,8 @@ public class NoteService {
                        NoteDocumentMapper noteDocumentMapper,
                        UserMapper userMapper,
                        JwtService jwtService,
-                       @Value("${collab.url:ws://localhost:19082}") String collabUrl) {
+                       // @Value: 从配置读取协作服务地址,用于返回给前端连接 Hocuspocus。
+                       @Value("${collab.url:ws://localhost:19082/collab/notes}") String collabUrl) {
         this.noteMapper = noteMapper;
         this.noteMemberMapper = noteMemberMapper;
         this.noteDocumentMapper = noteDocumentMapper;
@@ -51,6 +60,7 @@ public class NoteService {
         this.collabUrl = collabUrl;
     }
 
+    // @Transactional(readOnly = true): 只读事务,用于成员/笔记查询和权限校验。
     @Transactional(readOnly = true)
     public List<NoteResponse> list(Long userId) {
         List<NoteMember> memberships = noteMemberMapper.selectList(new LambdaQueryWrapper<NoteMember>()
@@ -74,8 +84,10 @@ public class NoteService {
         return toResponse(note, role);
     }
 
+    // @Transactional: 创建笔记、OWNER 成员、空文档快照必须在一个事务内成功或回滚。
     @Transactional
     public NoteResponse create(NoteRequest request, Long ownerId) {
+        // 创建笔记时同时创建 OWNER 成员和空文档快照,保证后续协作服务一定能 load 到记录。
         Note note = new Note();
         note.setTitle(request.title());
         note.setOwnerId(ownerId);
@@ -160,6 +172,7 @@ public class NoteService {
 
     @Transactional(readOnly = true)
     public CollabTokenResponse collabToken(Long noteId, Long userId, String username) {
+        // 普通登录 JWT 只给业务 API 使用;协作 WS 只认 typ=collab 的短期 token,降低泄漏后的影响面。
         String role = requireRole(noteId, userId);
         if ("VIEWER".equals(role)) {
             throw new ForbiddenException("只读成员暂不能进入协作编辑");
@@ -170,6 +183,7 @@ public class NoteService {
 
     @Transactional(readOnly = true)
     public String loadDocumentState(Long noteId) {
+        // 内部接口也先确认笔记存在,避免协作服务创建不存在的野文档。
         requireNote(noteId);
         NoteDocumentState document = noteDocumentMapper.selectState(noteId);
         byte[] state = document == null ? null : document.getYdocState();
@@ -181,6 +195,7 @@ public class NoteService {
 
     @Transactional
     public void saveDocumentState(Long noteId, String base64State) {
+        // Hocuspocus 存的是 Yjs update 二进制;HTTP JSON 层传 Base64,到库前转回 byte[]。
         requireNote(noteId);
         byte[] state = base64State == null || base64State.isBlank()
                 ? new byte[0]

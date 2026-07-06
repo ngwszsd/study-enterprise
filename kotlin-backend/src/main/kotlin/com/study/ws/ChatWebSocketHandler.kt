@@ -18,6 +18,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
  * 【前端类比】你前端 new WebSocket('ws://.../ws/chat') 连的就是这里。三个 override = 连接建立/收到消息/关闭;
  * 维护所有在线会话,收到一条就广播给全部人(双向)。
  */
+// @Component: 注册成 Spring Bean,这样 WebSocketConfig 可以通过构造器注入它。
 @Component
 class ChatWebSocketHandler(private val objectMapper: ObjectMapper) : TextWebSocketHandler() {
 
@@ -41,6 +42,7 @@ class ChatWebSocketHandler(private val objectMapper: ObjectMapper) : TextWebSock
     }
 
     /** 文章创建事件 → 广播系统消息(WS 与业务通过 Spring 事件联动)。 */
+    // @EventListener: 监听 ArticleService 发布的 Spring 事件,再转成 WebSocket 系统消息。
     @EventListener
     fun onArticleCreated(event: ArticleCreatedEvent) {
         broadcast(ChatMessage("system", "📝 新文章:《${event.title}》 by ${event.author}", now()))

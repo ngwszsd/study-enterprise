@@ -25,14 +25,23 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
-/** 协作笔记接口:业务权限走普通 JWT,文档快照内部接口供 Hocuspocus 服务调用。 */
+/**
+ * 协作笔记接口。
+ *
+ * 浏览器普通请求走登录 JWT;Nest/Hocuspocus 只通过 /internal/{id}/document 读写 Yjs 快照,
+ * 并用 X-Collab-Secret 做服务间鉴权。
+ */
+// @RestController: 声明 REST 控制器,返回 DTO 会被 Jackson 写成 JSON。
+// @RequestMapping: 统一声明协作笔记接口前缀 /api/notes。
 @RestController
 @RequestMapping("/api/notes")
 class NoteController(
     private val noteService: NoteService,
+    // @Value: 从配置/环境变量读取 collab.internal-secret,没有配置时用默认值。
     @Value("\${collab.internal-secret:dev-collab-secret}") private val collabInternalSecret: String,
 ) {
 
+    // @AuthenticationPrincipal: 当前登录用户来自 JWT 过滤器,用于判断笔记成员权限。
     @GetMapping
     fun list(@AuthenticationPrincipal user: AuthUser): List<NoteResponse> = noteService.list(user.id)
 
@@ -76,10 +85,13 @@ class NoteController(
         @AuthenticationPrincipal user: AuthUser,
     ) = noteService.removeMember(id, user.id, userId)
 
+    // @PostMapping: 浏览器先调这里换短期 collab token,再连接 Nest/Hocuspocus WebSocket。
     @PostMapping("/{id}/collab-token")
     fun collabToken(@PathVariable id: Long, @AuthenticationPrincipal user: AuthUser): CollabTokenResponse =
         noteService.collabToken(id, user.id, user.username)
 
+    /** Nest/Hocuspocus 加载文档时调用:返回 Base64 字符串,避免 JSON 直接承载二进制。 */
+    // @RequestHeader: 读取服务间调用的 X-Collab-Secret,它不是用户 JWT。
     @GetMapping("/internal/{id}/document")
     fun loadDocument(
         @PathVariable id: Long,
@@ -89,6 +101,7 @@ class NoteController(
         return NoteDocumentStateResponse(noteService.loadDocumentState(id))
     }
 
+    /** Nest/Hocuspocus debounce 持久化时调用:保存完整 Yjs update 快照。 */
     @PutMapping("/internal/{id}/document")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun saveDocument(
@@ -100,6 +113,7 @@ class NoteController(
         noteService.saveDocumentState(id, request.state)
     }
 
+    /** 内部接口必须和 collab-server 的 COLLAB_INTERNAL_SECRET 一致。 */
     private fun requireInternalSecret(secret: String) {
         if (secret != collabInternalSecret) {
             throw UnauthorizedException("协作服务密钥无效")
