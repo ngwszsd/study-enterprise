@@ -2,6 +2,7 @@ package com.study.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.study.domain.Note;
+import com.study.domain.NoteDocumentState;
 import com.study.domain.NoteMember;
 import com.study.domain.User;
 import com.study.exception.ForbiddenException;
@@ -170,7 +171,8 @@ public class NoteService {
     @Transactional(readOnly = true)
     public String loadDocumentState(Long noteId) {
         requireNote(noteId);
-        byte[] state = noteDocumentMapper.selectState(noteId);
+        NoteDocumentState document = noteDocumentMapper.selectState(noteId);
+        byte[] state = document == null ? null : document.getYdocState();
         if (state == null || state.length == 0) {
             return "";
         }

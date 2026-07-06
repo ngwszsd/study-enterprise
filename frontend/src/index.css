@@ -1,1 +1,20 @@
 @import "tailwindcss";
+@import "@heroui/styles/css";
+
+html {
+  min-height: 100%;
+  background: #f3f4ef;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: #1f2937;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(243, 244, 239, 0.96)),
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.13), transparent 30rem);
+}
+
+#root {
+  min-height: 100vh;
+}

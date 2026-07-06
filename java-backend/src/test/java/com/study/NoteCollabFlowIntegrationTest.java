@@ -29,6 +29,10 @@ class NoteCollabFlowIntegrationTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"note_alice\",\"password\":\"secret123\"}"))
                 .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"note_bob\",\"password\":\"secret123\"}"))
+                .andExpect(status().isCreated());
 
         String loginBody = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -46,6 +50,23 @@ class NoteCollabFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.role").value("OWNER"))
                 .andReturn().getResponse().getContentAsString();
         long noteId = objectMapper.readTree(createBody).get("id").asLong();
+
+        String searchBody = mockMvc.perform(get("/api/users")
+                        .header("Authorization", "Bearer " + token)
+                        .param("keyword", "note_bob"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].username").value("note_bob"))
+                .andExpect(jsonPath("$[0].passwordHash").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        long bobId = objectMapper.readTree(searchBody).get(0).get("id").asLong();
+
+        mockMvc.perform(post("/api/notes/" + noteId + "/members")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"userId\":" + bobId + ",\"role\":\"EDITOR\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.username").value("note_bob"))
+                .andExpect(jsonPath("$.role").value("EDITOR"));
 
         mockMvc.perform(post("/api/notes/" + noteId + "/collab-token")
                         .header("Authorization", "Bearer " + token))

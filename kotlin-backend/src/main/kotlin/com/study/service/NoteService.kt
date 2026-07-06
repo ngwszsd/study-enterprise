@@ -142,7 +142,7 @@ class NoteService(
     @Transactional(readOnly = true)
     fun loadDocumentState(noteId: Long): String {
         requireNote(noteId)
-        val state = noteDocumentMapper.selectState(noteId)
+        val state = noteDocumentMapper.selectState(noteId)?.ydocState
         return if (state == null || state.isEmpty()) "" else Base64.getEncoder().encodeToString(state)
     }
 

@@ -15,7 +15,7 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// 响应拦截:401 统一清 token 跳登陆
+// 响应拦截:401 统一清 token 跳登录
 api.interceptors.response.use(
   (response) => response,
   (error) => {

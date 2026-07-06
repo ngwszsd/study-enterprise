@@ -1,55 +1,95 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react'
+import {
+  Button as HeroButton,
+  Input as HeroInput,
+  Spinner as HeroSpinner,
+  TextArea as HeroTextarea,
+} from '@heroui/react'
+import type { ComponentProps, ReactNode } from 'react'
 
-export function Button({ className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
+type HeroButtonProps = Omit<ComponentProps<typeof HeroButton>, 'className'> & {
+  className?: string
+  disabled?: boolean
+}
+type HeroInputProps = ComponentProps<typeof HeroInput>
+type HeroTextareaProps = ComponentProps<typeof HeroTextarea>
+
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(' ')
+}
+
+export function Button({ className = '', disabled, isDisabled, ...props }: HeroButtonProps) {
   return (
-    <button
-      className={`inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 ${className}`}
+    <HeroButton
+      variant="primary"
+      className={cx('min-w-24', className)}
+      isDisabled={isDisabled ?? disabled}
       {...props}
     />
   )
 }
 
-export function GhostButton({ className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
+export function GhostButton({ className = '', disabled, isDisabled, ...props }: HeroButtonProps) {
   return (
-    <button
-      className={`inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50 ${className}`}
+    <HeroButton
+      variant="outline"
+      className={cx('min-w-20', className)}
+      isDisabled={isDisabled ?? disabled}
       {...props}
     />
   )
 }
 
-export function Input({ className = '', ...props }: InputHTMLAttributes<HTMLInputElement>) {
+export function DangerButton({ className = '', disabled, isDisabled, ...props }: HeroButtonProps) {
   return (
-    <input
-      className={`w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 ${className}`}
+    <HeroButton
+      variant="danger-soft"
+      className={cx('min-w-20', className)}
+      isDisabled={isDisabled ?? disabled}
       {...props}
     />
   )
 }
 
-export function Textarea({ className = '', ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return (
-    <textarea
-      className={`w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 ${className}`}
-      {...props}
-    />
-  )
+export function Input({ className = '', fullWidth = true, ...props }: HeroInputProps) {
+  return <HeroInput variant="primary" fullWidth={fullWidth} className={className} {...props} />
 }
 
-export function Field({ label, children }: { label: string; children: ReactNode }) {
+export function Textarea({ className = '', fullWidth = true, ...props }: HeroTextareaProps) {
+  return <HeroTextarea variant="primary" fullWidth={fullWidth} className={className} {...props} />
+}
+
+export function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string
+  hint?: string
+  children: ReactNode
+}) {
   return (
-    <label className="block space-y-1">
-      <span className="text-sm font-medium text-gray-700">{label}</span>
+    <div className="block space-y-2">
+      <span className="block text-sm font-semibold text-slate-700">{label}</span>
       {children}
-    </label>
+      {hint && <span className="block text-xs leading-5 text-slate-500">{hint}</span>}
+    </div>
   )
 }
 
 export function ErrorText({ children }: { children?: ReactNode }) {
   if (!children) return null
-  return <p className="text-sm text-red-600">{children}</p>
+  return (
+    <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm leading-6 text-rose-700">
+      {children}
+    </p>
+  )
 }
 
 export function Spinner({ text = '加载中…' }: { text?: string }) {
-  return <div className="p-8 text-center text-gray-500">{text}</div>
+  return (
+    <div className="flex min-h-52 items-center justify-center gap-3 p-8 text-slate-500">
+      <HeroSpinner size="sm" color="accent" />
+      <span className="text-sm font-medium">{text}</span>
+    </div>
+  )
 }

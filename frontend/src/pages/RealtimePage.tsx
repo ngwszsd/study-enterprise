@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { Card, Chip, Separator } from '@heroui/react'
+import { ArrowLeft, BellRing, Cable, Database, RadioTower, Send, ServerCog, ShieldCheck, Wifi } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { getToken } from '../auth/token'
+import { AppShell } from '../components/AppShell'
 import { Button, Input } from '../components/ui'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:18080'
@@ -21,41 +24,44 @@ interface Notice {
 
 /** 技术栈看板:体现本项目用到的全部技术;WS/SSE 显示实时连接状态。 */
 function TechPanel({ wsOn, sseOn }: { wsOn: boolean; sseOn: boolean }) {
-  const items: Array<{ name: string; desc: string; live?: boolean }> = [
-    { name: 'JWT + Spring Security', desc: '登陆鉴权、无状态过滤链' },
-    { name: 'MyBatis-Plus + MySQL', desc: '文章 CRUD、分页、条件查询' },
-    { name: '手写 SQL', desc: '分类统计 @Select GROUP BY' },
-    { name: 'Redis', desc: '文章详情缓存 + 浏览量计数' },
-    { name: 'MinIO', desc: '封面图上传/删除、预签名 URL' },
-    { name: 'WebSocket', desc: '实时聊天(双向)', live: wsOn },
-    { name: 'SSE', desc: '新文章实时通知(服务端推送)', live: sseOn },
+  const items: Array<{ name: string; desc: string; icon: typeof ShieldCheck; live?: boolean }> = [
+    { name: 'JWT + Spring Security', desc: '登录鉴权、无状态过滤链', icon: ShieldCheck },
+    { name: 'MyBatis-Plus + MySQL', desc: '文章 CRUD、分页、条件查询', icon: Database },
+    { name: '手写 SQL', desc: '分类统计 @Select GROUP BY', icon: ServerCog },
+    { name: 'Redis', desc: '文章详情缓存 + 浏览量计数', icon: Database },
+    { name: 'MinIO', desc: '封面图上传/删除、预签名 URL', icon: ServerCog },
+    { name: 'WebSocket', desc: '实时聊天(双向)', icon: Cable, live: wsOn },
+    { name: 'SSE', desc: '新文章实时通知(服务端推送)', icon: RadioTower, live: sseOn },
   ]
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
-      <h2 className="mb-3 text-sm font-semibold text-gray-900">技术栈(全部用于本项目)</h2>
+    <Card className="border border-slate-200/80 bg-white/90 shadow-sm">
+      <Card.Header>
+        <h2 className="text-sm font-bold text-slate-900">技术栈(全部用于本项目)</h2>
+      </Card.Header>
+      <Separator />
+      <Card.Content>
       <ul className="grid gap-2 sm:grid-cols-2">
         {items.map((it) => (
-          <li key={it.name} className="flex items-start gap-2">
-            <span
-              className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
-                it.live === undefined ? 'bg-emerald-500' : it.live ? 'bg-emerald-500' : 'bg-gray-300'
-              }`}
-            />
+          <li key={it.name} className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-teal-50 text-teal-700">
+              <it.icon size={16} />
+            </span>
             <div>
-              <div className="text-sm font-medium text-gray-800">
+              <div className="text-sm font-bold text-slate-700">
                 {it.name}
                 {it.live !== undefined && (
-                  <span className={`ml-2 text-xs ${it.live ? 'text-emerald-600' : 'text-gray-400'}`}>
+                  <span className={`ml-2 text-xs ${it.live ? 'text-emerald-700' : 'text-slate-400'}`}>
                     {it.live ? '已连接' : '未连接'}
                   </span>
                 )}
               </div>
-              <div className="text-xs text-gray-500">{it.desc}</div>
+              <div className="mt-1 text-xs leading-5 text-slate-500">{it.desc}</div>
             </div>
           </li>
         ))}
       </ul>
-    </div>
+      </Card.Content>
+    </Card>
   )
 }
 
@@ -113,13 +119,22 @@ export default function RealtimePage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6">
-      <header className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">实时 · WebSocket + SSE</h1>
-        <Link to="/articles" className="text-sm text-indigo-600 hover:underline">
-          ← 返回文章
-        </Link>
-      </header>
+    <AppShell>
+      <div className="mx-auto w-[min(100%-24px,1180px)] py-8 md:w-[min(100%-32px,1180px)]">
+        <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="flex gap-2">
+              <Chip size="sm" variant="soft" color={wsConnected ? 'success' : 'default'}>WS</Chip>
+              <Chip size="sm" variant="soft" color={sseConnected ? 'success' : 'default'}>SSE</Chip>
+            </div>
+            <h1 className="mt-3 text-3xl font-extrabold tracking-normal text-slate-950">实时链路</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-500">WebSocket 双向聊天，SSE 服务端通知。</p>
+          </div>
+          <Link to="/articles" className="inline-flex items-center gap-2 text-sm font-semibold text-teal-700 hover:underline">
+            <ArrowLeft size={16} />
+            返回文章
+          </Link>
+        </header>
 
       <div className="mb-4">
         <TechPanel wsOn={wsConnected} sseOn={sseConnected} />
@@ -127,59 +142,74 @@ export default function RealtimePage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* WebSocket 聊天 */}
-        <section className="flex flex-col rounded-xl border border-gray-200 bg-white p-4">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900">聊天室(WebSocket)</h2>
-            <span className={`text-xs ${wsConnected ? 'text-emerald-600' : 'text-gray-400'}`}>
-              {wsConnected ? '● 在线' : '○ 离线'}
-            </span>
-          </div>
-          <div className="mb-3 h-64 space-y-1 overflow-y-auto rounded-md bg-gray-50 p-2 text-sm">
+        <Card className="border border-slate-200/80 bg-white/90 shadow-sm">
+          <Card.Header className="flex-row justify-between">
+            <h2 className="inline-flex items-center gap-2 font-bold text-slate-900">
+              <Wifi size={17} />
+              聊天室(WebSocket)
+            </h2>
+            <Chip size="sm" variant="soft" color={wsConnected ? 'success' : 'default'}>{wsConnected ? '在线' : '离线'}</Chip>
+          </Card.Header>
+          <Card.Content>
+          <div className="mb-3 h-72 space-y-2 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm">
             {messages.length === 0 ? (
-              <p className="p-4 text-center text-gray-400">还没有消息,发一条试试</p>
+              <p className="p-6 text-center text-slate-400">还没有消息，发一条试试</p>
             ) : (
               messages.map((m, i) => (
-                <div key={i} className={m.from === 'system' ? 'text-gray-400' : ''}>
-                  <span className="text-xs text-gray-400">{m.time} </span>
-                  <span className="font-medium">{m.from === 'system' ? '' : `${m.from}:`}</span> {m.text}
+                <div
+                  key={i}
+                  className={`rounded-xl px-3 py-2 ${
+                    m.from === 'system'
+                      ? 'bg-transparent text-slate-400'
+                      : 'bg-white text-slate-700 shadow-sm'
+                  }`}
+                >
+                  <span className="text-xs text-slate-400">{m.time} </span>
+                  <span className="font-bold">{m.from === 'system' ? '' : `${m.from}:`}</span> {m.text}
                 </div>
               ))
             )}
           </div>
-          <form onSubmit={send} className="flex gap-2">
+          <form onSubmit={send} className="grid gap-2 sm:grid-cols-[1fr_auto]">
             <Input placeholder="说点什么…" value={input} onChange={(e) => setInput(e.target.value)} />
             <Button type="submit" disabled={!wsConnected}>
+              <Send size={16} />
               发送
             </Button>
           </form>
-          <p className="mt-2 text-xs text-gray-400">提示:另开一个标签页登陆,两边即可实时对话。</p>
-        </section>
+          <p className="mt-2 text-xs text-slate-400">提示：另开一个标签页登录，两边即可实时对话。</p>
+          </Card.Content>
+        </Card>
 
         {/* SSE 通知 */}
-        <section className="flex flex-col rounded-xl border border-gray-200 bg-white p-4">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900">实时通知(SSE)</h2>
-            <span className={`text-xs ${sseConnected ? 'text-emerald-600' : 'text-gray-400'}`}>
-              {sseConnected ? '● 已连接' : '○ 连接中'}
-            </span>
-          </div>
-          <div className="h-64 space-y-2 overflow-y-auto rounded-md bg-gray-50 p-2 text-sm">
+        <Card className="border border-slate-200/80 bg-white/90 shadow-sm">
+          <Card.Header className="flex-row justify-between">
+            <h2 className="inline-flex items-center gap-2 font-bold text-slate-900">
+              <BellRing size={17} />
+              实时通知(SSE)
+            </h2>
+            <Chip size="sm" variant="soft" color={sseConnected ? 'success' : 'default'}>{sseConnected ? '已连接' : '连接中'}</Chip>
+          </Card.Header>
+          <Card.Content>
+          <div className="h-72 space-y-2 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm">
             {notices.length === 0 ? (
-              <p className="p-4 text-center text-gray-400">去发一篇文章,这里会实时收到推送</p>
+              <p className="p-6 text-center text-slate-400">去发一篇文章，这里会实时收到推送</p>
             ) : (
               notices.map((n, i) => (
-                <div key={i} className="rounded-md border border-gray-100 bg-white p-2">
-                  <div className="text-xs text-gray-400">{n.at}</div>
-                  <div>
-                    📝 新文章:《{n.title}》 by {n.author}
+                <div key={i} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                  <div className="text-xs text-slate-400">{n.at}</div>
+                  <div className="mt-1 font-semibold text-slate-700">
+                    新文章：《{n.title}》 by {n.author}
                   </div>
                 </div>
               ))
             )}
           </div>
-          <p className="mt-2 text-xs text-gray-400">你({user?.username})或他人一发文章,这里立刻收到。</p>
-        </section>
+          <p className="mt-2 text-xs text-slate-400">你（{user?.username}）或他人一发文章，这里立刻收到。</p>
+          </Card.Content>
+        </Card>
       </div>
-    </div>
+      </div>
+    </AppShell>
   )
 }

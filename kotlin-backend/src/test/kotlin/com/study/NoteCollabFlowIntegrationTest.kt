@@ -31,6 +31,12 @@ class NoteCollabFlowIntegrationTest : AbstractIntegrationTest() {
                 .content("""{"username":"note_alice","password":"secret123"}"""),
         )
             .andExpect(status().isCreated)
+        mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"username":"note_bob","password":"secret123"}"""),
+        )
+            .andExpect(status().isCreated)
 
         val loginBody = mockMvc.perform(
             post("/api/auth/login")
@@ -52,6 +58,27 @@ class NoteCollabFlowIntegrationTest : AbstractIntegrationTest() {
             .andExpect(jsonPath("$.role").value("OWNER"))
             .andReturn().response.contentAsString
         val noteId = objectMapper.readTree(createBody).get("id").asLong()
+
+        val searchBody = mockMvc.perform(
+            get("/api/users")
+                .header("Authorization", "Bearer $token")
+                .param("keyword", "note_bob"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$[0].username").value("note_bob"))
+            .andExpect(jsonPath("$[0].passwordHash").doesNotExist())
+            .andReturn().response.contentAsString
+        val bobId = objectMapper.readTree(searchBody).get(0).get("id").asLong()
+
+        mockMvc.perform(
+            post("/api/notes/$noteId/members")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"userId":$bobId,"role":"EDITOR"}"""),
+        )
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.username").value("note_bob"))
+            .andExpect(jsonPath("$.role").value("EDITOR"))
 
         mockMvc.perform(
             post("/api/notes/$noteId/collab-token")

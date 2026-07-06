@@ -3,7 +3,7 @@ import { useAuth } from '../auth/AuthContext'
 
 export default function ProtectedRoute() {
   const { user, loading } = useAuth()
-  if (loading) return <div className="p-8 text-center text-gray-500">加载中…</div>
+  if (loading) return <div className="p-8 text-center text-slate-500">加载中…</div>
   if (!user) return <Navigate to="/login" replace />
   return <Outlet />
 }

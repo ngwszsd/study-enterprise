@@ -8,7 +8,7 @@
 
 用 Java 与 Kotlin 各写一套**业务完全相同**的企业级 Spring Boot 后端(以"语言"为唯一变量对照学习),
 覆盖:注册/登陆(JWT)、文章 CRUD + 分页搜索、Redis 缓存与浏览量、MinIO 文件上传、Yjs/Hocuspocus 实时多人协作笔记。
-共用一个 React + Vite + Tailwind 前端串起全链路。暂不用 monorepo。
+共用一个 React + Rsbuild + Tailwind 前端串起全链路。暂不用 monorepo。
 
 ## 2. 技术栈
 
@@ -24,12 +24,15 @@
 | 对象存储 | MinIO(官方 Java SDK) |
 | 实时 | WebSocket(聊天室)+ SSE(通知流),Spring 事件驱动 |
 | 协作编辑 | NestJS + Hocuspocus + Yjs(短期协作 token + MySQL binary snapshot) |
-| 前端 | React + Vite + TypeScript + Tailwind |
+| 前端 | React + Rsbuild + TypeScript + Tailwind + HeroUI |
 | 基础设施 | Docker Compose(MySQL + MinIO + Redis) |
 
 > 注:Java 侧未用 Lombok(JDK 25 上其注解处理器有兼容风险,故手写 getter/setter);企业中常用 Lombok,可自行加回。Kotlin 侧用 data class 天然免样板。
 >
 > **JDK 统一**:两套后端目标字节码均 **Java 21**。Java(Maven)用 `--release 21` 在本机 JDK 上编译;Kotlin(Gradle)用 `jvmToolchain(21)` 锁定 JDK 21(本机无则经 foojay 自动下载),**不受机器 `JAVA_HOME` 影响**(本机 `JAVA_HOME` 恰好指向 JDK 17,直接跑会踩坑,工具链规避了它)。
+>
+> **Node 版本**:前端使用 **Rsbuild**。Rsbuild/Rspack 要求 Node.js `20.19+` 或 `22.12+`。如果 `node -v`
+> 显示 `20.12.x`,先 `export PATH="$HOME/.nvm/versions/node/v22.18.0/bin:$PATH"` 再跑 `make web`。
 
 ## 3. 目录结构
 
@@ -42,7 +45,7 @@ study-enterprise/
 ├── java-backend/              # Spring Boot(Java):18080
 ├── kotlin-backend/            # Spring Boot(Kotlin):18081
 ├── collab-server/             # NestJS + Hocuspocus 协作服务:19082
-└── frontend/                  # React + Vite + Tailwind:15173
+└── frontend/                  # React + Rsbuild + Tailwind + HeroUI:15173
 ```
 
 Java 后端包结构:`domain / mapper / service / storage / cache / security / config / web(controller+dto) / exception`。
@@ -57,7 +60,7 @@ Java 后端包结构:`domain / mapper / service / storage / cache / security / c
 | MinIO API / Console | 19100 / 19101 |
 | Redis | 16379 |
 | 协作服务(Hocuspocus) | 19082 |
-| 前端 Vite | 15173 |
+| 前端 Rsbuild | 15173 |
 
 ## 5. 如何运行
 
@@ -91,11 +94,42 @@ cd kotlin-backend && ./gradlew bootRun
 cd collab-server && pnpm install && pnpm dev
 #   切 Kotlin 后端:COLLAB_BACKEND_URL=http://localhost:18081 pnpm dev
 
-# 前端(:15173)
+# 前端(:15173,Rsbuild)
 cd frontend && pnpm install && pnpm dev
 ```
 
 MinIO 控制台:http://localhost:19101(`minioadmin` / `minioadmin123`)。
+
+### 5.1 协作笔记启动教程
+
+**Java 后端链路**(默认):
+
+```bash
+make up       # 终端 1:MySQL + MinIO + Redis
+make java     # 终端 2:Java 后端 :18080
+make collab   # 终端 3:NestJS + Hocuspocus :19082,默认连 Java 后端
+make web      # 终端 4:React 前端 :15173
+```
+
+打开 http://localhost:15173 。
+
+**Kotlin 后端链路**:
+
+```bash
+make up
+make kotlin
+cd collab-server && COLLAB_BACKEND_URL=http://localhost:18081 pnpm dev
+cd frontend && VITE_API_BASE_URL=http://localhost:18081 pnpm dev
+```
+
+**学习账号**:项目不内置种子账号。启动后在 `/register` 注册:
+
+| 用户名 | 密码 |
+|---|---|
+| `alice_demo` | `secret123` |
+| `bob_demo` | `secret123` |
+
+多人协作测试:用 `alice_demo` 新建笔记,在成员面板搜索 `bob_demo` 并添加为编辑者,再用两个浏览器窗口分别登陆两人并打开同一篇笔记。
 
 ## 6. 环境变量
 
@@ -110,6 +144,7 @@ MinIO 控制台:http://localhost:19101(`minioadmin` / `minioadmin123`)。
 | POST | `/api/auth/register` | `{username,password}` → 201 `{id,username}` |
 | POST | `/api/auth/login` | → 200 `{token,tokenType,expiresIn}` |
 | GET | `/api/auth/me` | → 200 `{id,username}` |
+| GET | `/api/users?keyword=` | 搜索用户,用于协作成员选择 → `[{id,username}]` |
 | GET | `/api/articles?page=0&size=10&keyword=` | 分页+标题搜索 → `PageResponse` |
 | GET | `/api/articles/stats` | 按分类统计(手写 SQL @Select GROUP BY)→ `[{category,count}]` |
 | GET | `/api/articles/{id}` | 详情(浏览量 +1)→ `Article` |

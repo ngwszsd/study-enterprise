@@ -1,0 +1,4 @@
+{"type":"cli","id":"CLI-1783063156390-1","timestamp":"2026-07-03T07:19:16.390Z","command":"spec load","args":{"category":"ui","stdin":false}}
+{"type":"cli","id":"CLI-1783070621015-1","timestamp":"2026-07-03T09:23:41.015Z","command":"spec add","args":{"category":"debug","keywords":"mybatis,blob,bytearray,yjs,notes","stdin":false}}
+{"type":"cli","id":"CLI-1783072728953-1","timestamp":"2026-07-03T09:58:48.953Z","command":"spec add","args":{"category":"debug","keywords":"tiptap,focus,toolbar,rich-text","stdin":false}}
+{"type":"cli","id":"CLI-1783074919942-1","timestamp":"2026-07-03T10:35:19.942Z","command":"spec add","args":{"category":"debug","keywords":"tiptap,collaboration-caret,hocuspocus,awareness,updateUser","stdin":false}}

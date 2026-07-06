@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from './config.service.js'
 
 @Injectable()
 export class BackendClient {
-  constructor(private readonly config: ConfigService) {}
+  constructor(@Inject(ConfigService) private readonly config: ConfigService) {}
 
   async loadDocument(noteId: number): Promise<Uint8Array> {
     const res = await fetch(`${this.config.backendUrl}/api/notes/internal/${noteId}/document`, {
