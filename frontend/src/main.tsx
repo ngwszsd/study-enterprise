@@ -6,11 +6,11 @@ import { AuthProvider } from './auth/AuthContext'
 import './index.css'
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  <>
     <BrowserRouter>
       <AuthProvider>
         <App />
       </AuthProvider>
     </BrowserRouter>
-  </StrictMode>,
+  </>,
 )
